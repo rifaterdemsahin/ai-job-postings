@@ -1,19 +1,26 @@
 # AI Job Postings Edge Hub ⚡
 
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-V8_Isolates-F38020?logo=cloudflare)](https://ai-job-postings.polished-boat-17b2.workers.dev)
+[![Big Tech](https://img.shields.io/badge/Big_Tech-Palantir_|_MSFT_|_Apple_|_Google_|_Meta-0078D4)](#-big-tech--frontier-ai-careers-section)
 [![Azure Key Vault](https://img.shields.io/badge/Azure_Key_Vault-dp--kv--deliverypilot-0078D4?logo=microsoftazure)](https://azure.microsoft.com/)
 [![Azure Blob Storage](https://img.shields.io/badge/Azure_Blob_Storage-dpstoryboardsa-0089D6?logo=microsoftazure)](https://azure.microsoft.com/)
-[![Aggregator](https://img.shields.io/badge/Aggregator-JobServe_|_Remotive_|_ATS-60A5FA)](#multi-source-aggregation-engine)
 
-High-performance, edge-native job board aggregating **Forward Deployed AI Engineer (FDE)** and applied AI roles across **JobServe**, **Remotive**, **Greenhouse ATS**, and **Y Combinator** into sub-5ms Cloudflare V8 Isolates with daily **Azure Blob Object Storage** archiving.
+High-performance, edge-native job board aggregating **Forward Deployed AI Engineer (FDE / FDSE)**, foundation model systems, and applied AI roles across **Palantir**, **Microsoft**, **Apple**, **Google DeepMind**, **Meta**, and **JobServe**. Built on **Cloudflare Workers (V8 Isolates)** with automated once-daily **Azure Blob Object Storage** archiving.
 
 ---
 
 ## 🌐 Live Production Application
 
 - **Production URL:** [https://ai-job-postings.polished-boat-17b2.workers.dev](https://ai-job-postings.polished-boat-17b2.workers.dev)
-- **Job Catalog:** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs)
-- **Forward Deployed Engineer Role:** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/forward-deployed-engineer](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/forward-deployed-engineer)
+- **🏢 Big Tech AI Hub:** [https://ai-job-postings.polished-boat-17b2.workers.dev/big-tech](https://ai-job-postings.polished-boat-17b2.workers.dev/big-tech)
+- **All Jobs Catalog:** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs)
+
+### 🏢 Big Tech & Frontier AI Requisitions
+- **Palantir FDSE (AIP & LLMs):** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/palantir-forward-deployed-software-engineer](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/palantir-forward-deployed-software-engineer)
+- **Microsoft Applied AI (Copilot & Semantic Kernel):** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/microsoft-applied-ai-engineer-copilot](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/microsoft-applied-ai-engineer-copilot)
+- **Apple Intelligence (Edge Runtime & CoreML):** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/apple-intelligence-edge-runtime-engineer](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/apple-intelligence-edge-runtime-engineer)
+- **Google DeepMind (Gemini Applied Research):** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/google-deepmind-forward-deployed-research-engineer](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/google-deepmind-forward-deployed-research-engineer)
+- **Meta Generative AI (Llama & PyTorch Systems):** [https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/meta-generative-ai-systems-engineer](https://ai-job-postings.polished-boat-17b2.workers.dev/jobs/meta-generative-ai-systems-engineer)
 
 ### 👑 Admin Section (`/admin`)
 - **Admin > Azure Object Data:** [https://ai-job-postings.polished-boat-17b2.workers.dev/admin/azure-storage](https://ai-job-postings.polished-boat-17b2.workers.dev/admin/azure-storage)
@@ -23,20 +30,10 @@ High-performance, edge-native job board aggregating **Forward Deployed AI Engine
 - **Admin > Architecture & Aggregator Engine:** [https://ai-job-postings.polished-boat-17b2.workers.dev/admin/architecture](https://ai-job-postings.polished-boat-17b2.workers.dev/admin/architecture)
 
 ### ⚡ JSON Edge APIs
-- **Aggregator Trigger API:** [`GET /api/aggregate`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/aggregate)
+- **Big Tech Jobs API:** [`GET /api/big-tech`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/big-tech)
 - **Aggregated Jobs API:** [`GET /api/jobs`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/jobs)
 - **Azure Sync History API:** [`GET /api/azure-history`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/azure-history)
 - **Health Check:** [`GET /api/health`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/health)
-
----
-
-## 🔄 Multi-Source Aggregation Engine
-
-The system includes adapters for querying and unifying listings from:
-1. **JobServe UK & Global:** Scrapes contract & permanent FDE searches (`https://www.jobserve.com/gb/en/JobSearch.aspx?q=Forward+Deployed+AI+Engineer`).
-2. **Remotive AI Jobs API:** Consumes remote software/AI job endpoints.
-3. **Greenhouse & Lever ATS Boards:** Pulls direct company postings from frontier AI labs.
-4. **Y Combinator (Work at a Startup):** Curates early-stage startup engineering listings.
 
 ---
 
@@ -53,7 +50,7 @@ Zero secrets exist on disk, in `.env` files, or in Git.
 
 ---
 
-## 🚀 Deployment
+## 🚀 Deployment & Push
 
 ```bash
 # Validate build & bundle

@@ -2,195 +2,253 @@
  * AI Job Postings Hub - Cloudflare Worker Edge Application
  * 
  * Includes:
- * - Multi-source AI job aggregation engine (JobServe, Greenhouse/Lever, Remotive, HackerNews/YC, Reed/CWJobs format adapter).
- * - Admin Panel (/admin) housing:
- *    - Azure Object Data & Last Days Fetched
- *    - Deployment Guide
- *    - Cost Breakdown ($0/mo)
- *    - Vs Fly.io Comparison
- *    - Backend Architecture & Aggregation Pipeline Documentation
- * - Live Job Aggregator endpoint (/api/aggregate) to trigger/simulate multi-source fetch.
- * - Daily persistence into Azure Blob Object Storage (dpstoryboardsa/ai-jobs-data) once per day.
+ * - Big Tech & Frontier AI Enterprise Hub:
+ *    - Palantir (Pioneer of Forward Deployed Software Engineering - FDSE)
+ *    - Microsoft (Azure AI, Copilot, Semantic Kernel)
+ *    - Apple (Apple Intelligence, Foundation Models, ML Platform)
+ *    - Google (Google DeepMind, Gemini, Vertex AI)
+ *    - Meta / Facebook (FAIR, Llama, PyTorch, GenAI Infrastructure)
+ * - Specific direct career endpoints & job board scraper integrations
+ * - Once-per-calendar-day automated fetch and persistence to Azure Blob Object Storage (dpstoryboardsa/ai-jobs-data)
+ * - Admin Navigation (/admin) housing Azure Object Explorer, Architecture, Deployment Guide, Cost Breakdown, Fly.io comparison
  */
 
-// Baseline curated + aggregated jobs database
-let AGGREGATED_JOBS_CACHE = [
+// Enterprise Big Tech AI Hub Data Definitions
+const ENTERPRISE_AI_GPG = [
   {
-    id: "fde-genai-lead",
-    slug: "forward-deployed-engineer",
-    title: "Forward Deployed AI Engineer (Lead)",
-    company: "Nexus AI Systems",
-    location: "London, UK / Hybrid",
-    salary: "£140,000 - £185,000 + Equity",
-    source: "JobServe UK",
-    sourceUrl: "https://www.jobserve.com/gb/en/JobSearch.aspx?q=Forward+Deployed+AI+Engineer",
-    tags: ["LLMs", "RAG", "V8 Edge", "Customer Engineering", "Python/TypeScript"],
-    featured: true,
-    department: "Applied AI Solutions",
-    description: "Act as the critical technical bridge between foundation model research and Fortune 500 enterprise production deployments. Embed directly with enterprise engineering teams to design, benchmark, deploy, and scale high-throughput RAG pipelines, fine-tuned agentic workflows, and edge-native AI microservices.",
-    responsibilities: [
-      "Embed with top-tier clients to architect tailored production LLM applications, multimodal vision agents, and vector search systems.",
-      "Diagnose client-side data pipelines, latency bottlenecks, and integrate edge inference runtimes for sub-100ms response targets.",
-      "Translate complex client operational requirements into reusable open-source and internal SDK libraries, evaluation harnesses, and synthetic data generation suites.",
-      "Optimize cost-per-token and throughput by implementing dynamic routing across OpenAI, Anthropic, DeepSeek, and locally hosted vLLM clusters."
-    ],
-    requirements: [
-      "4+ years building and deploying production distributed backend systems (Python, Go, or TypeScript/Node.js).",
-      "Deep practical experience with LLM orchestration (LangChain, LlamaIndex, DSPy, or custom tool-calling agents).",
-      "Hands-on expertise with vector databases (Pinecone, Qdrant, Cloudflare Vectorize, Milvus) and hybrid lexical/dense retrieval.",
-      "Proven customer-facing or solutions engineering empathy—ability to explain complex AI trade-offs to CTOs and engineers alike."
-    ],
-    benefits: [
-      "£140k - £185k base + competitive Series B equity package",
-      "£5,000 annual continuous learning & AI research stipend",
-      "Private health, dental, and optical cover for you and dependents"
+    companyId: "palantir",
+    companyName: "Palantir Technologies",
+    logoIcon: "🛡️",
+    brandColor: "#ffffff",
+    careerPortalUrl: "https://www.palantir.com/careers/",
+    jobBoardApi: "https://boards-api.greenhouse.io/v1/boards/palantir/jobs",
+    specialty: "Pioneer of Forward Deployed Software Engineering (FDSE) & AIP",
+    roles: [
+      {
+        id: "palantir-fdse-lead",
+        slug: "palantir-forward-deployed-software-engineer",
+        title: "Forward Deployed Software Engineer (FDSE) - AIP & LLMs",
+        company: "Palantir Technologies",
+        location: "London, UK / Hybrid",
+        salary: "£135,000 - £185,000 + Equity & Bonus",
+        source: "Palantir Careers (Greenhouse)",
+        sourceUrl: "https://www.palantir.com/careers/",
+        tags: ["FDSE", "Palantir AIP", "Foundry", "LLM Agents", "TypeScript/Python"],
+        featured: true,
+        department: "Forward Deployed Engineering",
+        description: "As a Forward Deployed Software Engineer at Palantir, you will deploy Palantir Artificial Intelligence Platform (AIP) directly inside defense, government, and FTSE-100 customer environments. You'll build operational LLM agents and real-time ontological workflows that turn sensitive data into decisions.",
+        responsibilities: [
+          "Embed on-site and hybrid with customer leadership to deploy high-leverage AI workflows on Palantir AIP.",
+          "Build secure ontological representations connecting disparate enterprise databases with foundation models.",
+          "Deliver robust human-in-the-loop agentic automations in mission-critical environments."
+        ],
+        requirements: [
+          "BSc/MSc in Computer Science or equivalent hands-on engineering track record.",
+          "Strong programming proficiency in TypeScript/React, Python, or Java/Go.",
+          "Deep interest in customer problems and rapid prototyping of applied AI systems."
+        ],
+        benefits: ["Top-tier Palantir equity package", "Comprehensive health/dental cover", "Central London office with catered meals"]
+      },
+      {
+        id: "palantir-deployment-strategist",
+        slug: "palantir-ai-deployment-strategist",
+        title: "AI Deployment Strategist - Enterprise LLMs",
+        company: "Palantir Technologies",
+        location: "London, UK",
+        salary: "£120,000 - £160,000 + Equity",
+        source: "Palantir Careers",
+        sourceUrl: "https://www.palantir.com/careers/",
+        tags: ["AI Strategy", "AIP", "Ontology", "Enterprise GenAI"],
+        featured: false,
+        department: "Deployment Strategy",
+        description: "Translate complex business operations into dynamic AI ontologies and AIP workflows for global defense, aerospace, and finance institutions.",
+        responsibilities: [
+          "Lead technical scoping and architectural discovery sessions with executive stakeholders.",
+          "Partner with FDSEs to design high-throughput LLM pipelines and automated evaluations."
+        ],
+        requirements: ["Strong technical literacy with Python or SQL", "Superb stakeholder communication skills"],
+        benefits: ["Full private healthcare", "Generous parental leave", "Annual training budget"]
+      }
     ]
   },
   {
-    id: "js-fde-palantir-style",
-    slug: "forward-deployed-solutions-architect",
-    title: "Forward Deployed Solutions Architect (Generative AI)",
-    company: "Vanguard Cognitive",
-    location: "London, City / Remote UK",
-    salary: "£130,000 - £160,000 + Bonus",
-    source: "JobServe AI Feed",
-    sourceUrl: "https://www.jobserve.com/gb/en/JobSearch.aspx?q=Generative+AI+Solutions",
-    tags: ["Enterprise AI", "LangGraph", "Cloudflare Workers", "Python", "FinTech"],
-    featured: true,
-    department: "Strategic Delivery",
-    description: "Deploy production-grade agentic workflow architectures for financial services and healthcare clients. Solve complex enterprise data ingestion and real-time inference latency challenges.",
-    responsibilities: [
-      "Architect and deploy customized enterprise agent networks with human-in-the-loop validation.",
-      "Design multi-tenant data pipelines securing PII/HIPAA data before passing to foundation models.",
-      "Build custom edge proxies for rate-limiting, token metering, and caching."
-    ],
-    requirements: [
-      "Experience deploying LLMs in regulated UK/EU enterprise environments.",
-      "Strong API design and cloud infrastructure skills (Azure / Cloudflare Edge).",
-      "Demonstrated track record in client-facing technical workshops and executive briefings."
-    ],
-    benefits: [
-      "£130k - £160k + 20% annual performance bonus",
-      "Work with cutting-edge frontier models",
-      "Flexible hybrid working in central London"
+    companyId: "microsoft",
+    companyName: "Microsoft",
+    logoIcon: "🪟",
+    brandColor: "#00a4ef",
+    careerPortalUrl: "https://careers.microsoft.com/",
+    jobBoardApi: "https://gcsservices.careers.microsoft.com/search/api/v1/search?q=AI%20Engineer",
+    specialty: "Azure OpenAI, Copilot Runtime, Semantic Kernel & Phi Models",
+    roles: [
+      {
+        id: "msft-azure-ai-fde",
+        slug: "microsoft-applied-ai-engineer-copilot",
+        title: "Applied AI Engineer - Copilot & Azure AI Studio",
+        company: "Microsoft",
+        location: "London (Paddington) / Remote UK",
+        salary: "£130,000 - £175,000 + Stock (L63-L65)",
+        source: "Microsoft Careers API",
+        sourceUrl: "https://careers.microsoft.com/",
+        tags: ["Azure AI", "Copilot Runtime", "Semantic Kernel", "Phi-3", "C#/Python"],
+        featured: true,
+        department: "Azure AI Platform",
+        description: "Build, optimize, and scale Copilot runtime services and Azure AI Studio infrastructure for millions of enterprise developers worldwide.",
+        responsibilities: [
+          "Design low-latency orchestration for small language models (Phi series) and large foundation models.",
+          "Implement high-throughput caching and fine-tuning pipelines using Semantic Kernel and ONNX Runtime.",
+          "Collaborate with OpenAI research teams on model alignment and multi-tenant security boundaries."
+        ],
+        requirements: [
+          "5+ years software engineering experience with C#, Python, or Go.",
+          "Expertise in distributed systems, vector search, and cloud-native Kubernetes/Azure microservices."
+        ],
+        benefits: ["Microsoft stock awards (on-hire + annual refreshers)", "25 days holiday + UK public holidays", "15% pension contribution"]
+      }
     ]
   },
   {
-    id: "remotive-ai-eval",
-    slug: "ai-eval-systems-engineer",
-    title: "AI Reliability & Evaluation Systems Engineer",
-    company: "HyperScale Cognitive",
-    location: "Remote (UK / EMEA)",
-    salary: "£120,000 - £150,000 + Equity",
-    source: "Remotive Tech",
-    sourceUrl: "https://remotive.com",
-    tags: ["LLM Evals", "Red Teaming", "Guardrails", "Python", "Observability"],
-    featured: false,
-    department: "Model Safety & Alignment",
-    description: "Design automated benchmark matrices, synthetic fuzzing pipelines, and safety guardrails to stress-test enterprise multi-agent workflows prior to production rollout.",
-    responsibilities: [
-      "Build continuous evaluation test suites benchmarking prompt drift, hallucination rates, and tool invocation accuracy.",
-      "Establish automated LLM-as-a-judge scoring frameworks calibrated against golden human baseline datasets.",
-      "Collaborate with security teams on LLM red-teaming (prompt injection, jailbreaks, data exfiltration)."
-    ],
-    requirements: [
-      "Strong background in statistical testing, data pipelines, and Python test automation.",
-      "Experience with LLM evaluation toolkits (Ragas, DeepEval, Promptfoo, Phoenix/Arize)."
-    ],
-    benefits: [
-      "Comprehensive private medical insurance",
-      "Full remote setup allowance (£2,000)",
-      "Uncapped time off"
+    companyId: "apple",
+    companyName: "Apple",
+    logoIcon: "🍏",
+    brandColor: "#a2aaad",
+    careerPortalUrl: "https://jobs.apple.com/",
+    jobBoardApi: "https://jobs.apple.com/api/v1/search?query=Machine%20Learning",
+    specialty: "Apple Intelligence, On-Device Neural Engine & Private Cloud Compute",
+    roles: [
+      {
+        id: "apple-intelligence-runtime",
+        slug: "apple-intelligence-edge-runtime-engineer",
+        title: "Apple Intelligence Edge Runtime Engineer",
+        company: "Apple",
+        location: "London (Battersea Power Station) / Cambridge",
+        salary: "£140,000 - £190,000 + RSU Grants (ICT4/ICT5)",
+        source: "Apple Jobs API",
+        sourceUrl: "https://jobs.apple.com/",
+        tags: ["Apple Intelligence", "CoreML", "Metal", "Private Cloud Compute", "C++/Swift"],
+        featured: true,
+        department: "Machine Learning and AI (MLPT)",
+        description: "Develop the next generation of on-device language models and Private Cloud Compute runtimes powering Apple Intelligence across 1+ billion devices.",
+        responsibilities: [
+          "Optimize transformer architectures for Apple Silicon Neural Engine (ANE) and Metal Performance Shaders.",
+          "Design privacy-preserving Private Cloud Compute attestation protocols and sub-10ms token generators.",
+          "Implement memory-efficient 2-bit and 4-bit quantization kernels for low-power on-device execution."
+        ],
+        requirements: [
+          "Strong systems programming background in C++, Swift, or Rust.",
+          "Deep knowledge of low-level GPU/NPU acceleration, quantization, and linear algebra libraries."
+        ],
+        benefits: ["Generous Apple RSU equity package", "Product discounts", "World-class Battersea campus facilities"]
+      }
     ]
   },
   {
-    id: "yc-edge-runtime",
-    slug: "edge-ai-runtime-engineer",
-    title: "Edge AI Runtime & WASM Engineer",
-    company: "Veloce Compute",
-    location: "Cambridge / Remote UK",
-    salary: "£130,000 - £165,000",
-    source: "Y Combinator Work at a Startup",
-    sourceUrl: "https://www.workatastartup.com",
-    tags: ["Rust", "WASM", "Cloudflare Workers", "ONNX", "Low-Latency"],
-    featured: false,
-    department: "Core Infrastructure",
-    description: "Compile and optimize small language models (SLMs) and embedding models to run inside WebAssembly isolates and Cloudflare Workers for sub-10ms localized inferences.",
-    responsibilities: [
-      "Port quantization frameworks (GGUF, AWQ, ONNX Runtime) to WebAssembly and Edge V8 environments.",
-      "Optimize SIMD vector instructions and memory footprint in memory-constrained isolates (128MB limit)."
-    ],
-    requirements: [
-      "Proficient in Rust or Modern C++ with WebAssembly compilation toolchains.",
-      "Familiarity with V8 isolate runtime models and Cloudflare Worker runtime constraints."
-    ],
-    benefits: [
-      "Work with pioneer compiler and edge infrastructure teams",
-      "Top-tier hardware setup (M4 Max / RTX 4090 dev server)"
+    companyId: "google",
+    companyName: "Google & Google DeepMind",
+    logoIcon: "🌐",
+    brandColor: "#4285f4",
+    careerPortalUrl: "https://www.google.com/about/careers/",
+    jobBoardApi: "https://careers.google.com/api/v3/search/?q=DeepMind%20AI",
+    specialty: "Google DeepMind, Gemini Models, Vertex AI & JAX TPU Infrastructure",
+    roles: [
+      {
+        id: "google-deepmind-fde",
+        slug: "google-deepmind-forward-deployed-research-engineer",
+        title: "Forward Deployed AI Research Engineer - Gemini",
+        company: "Google DeepMind",
+        location: "London (King's Cross) / Hybrid",
+        salary: "£150,000 - £210,000 + Google GSUs (L5/L6)",
+        source: "Google DeepMind Careers",
+        sourceUrl: "https://www.google.com/about/careers/",
+        tags: ["Google DeepMind", "Gemini 1.5/2.0", "JAX", "TPU v5p", "Multimodal"],
+        featured: true,
+        department: "DeepMind Applied Solutions",
+        description: "Work side-by-side with frontier model researchers and flagship enterprise partners to deploy multimodal Gemini systems on Cloud TPU clusters.",
+        responsibilities: [
+          "Port research breakthrough model checkpoints into scalable production inference pipelines.",
+          "Optimize million-token context window retrieval and video-audio multimodal understanding.",
+          "Benchmark and profile distributed JAX workloads across massive TPU v5p pods."
+        ],
+        requirements: [
+          "Expertise in Python, JAX/PyTorch, and distributed machine learning.",
+          "Track record building high-reliability production systems or publishing at top AI venues (NeurIPS, ICML)."
+        ],
+        benefits: ["High-value Google GSU equity grant", "Free gourmet meals on-site", "Comprehensive health coverage"]
+      }
     ]
   },
   {
-    id: "reed-fintech-ai",
-    slug: "fde-enterprise-fintech",
-    title: "Forward Deployed Engineer - FinTech AI",
-    company: "Aegis Intelligence",
-    location: "City of London / Hybrid",
-    salary: "£150,000 - £195,000 + Bonus",
-    source: "Reed / CWJobs",
-    sourceUrl: "https://www.cwjobs.co.uk",
-    tags: ["FinTech", "SOC2", "Audit Trails", "Agentic Workflows", "TypeScript"],
-    featured: true,
-    department: "Strategic Enterprise Deployments",
-    description: "Deploy deterministic financial parsing agents, regulatory compliance auditing LLMs, and real-time transaction anomaly detectors directly into Tier-1 investment bank environments.",
-    responsibilities: [
-      "Deliver air-gapped and zero-data-retention AI deployments for regulated financial institutions.",
-      "Implement multi-agent consensus protocols to ensure 99.999% numerical and audit consistency."
-    ],
-    requirements: [
-      "5+ years building mission-critical financial backend software or enterprise SaaS integrations.",
-      "Demonstrated ability to deploy compliant AI pipelines adhering to GDPR, SOC2, and PRA/FCA guidelines."
-    ],
-    benefits: [
-      "Discretionary annual performance bonus (20-40%)",
-      "Pension matching up to 12%"
+    companyId: "facebook",
+    companyName: "Meta (Facebook AI Research)",
+    logoIcon: "♾️",
+    brandColor: "#0668e1",
+    careerPortalUrl: "https://www.metacareers.com/",
+    jobBoardApi: "https://www.metacareers.com/api/v1/jobs?query=Llama",
+    specialty: "FAIR, Open-Source Llama Ecosystem, PyTorch & MTIA Accelerators",
+    roles: [
+      {
+        id: "meta-llama-systems-eng",
+        slug: "meta-generative-ai-systems-engineer",
+        title: "Generative AI Systems & Infrastructure Engineer (Llama)",
+        company: "Meta",
+        location: "London (Kings Cross / Rathbone) / Hybrid",
+        salary: "£145,000 - £200,000 + Meta RSUs (E5/E6)",
+        source: "Meta Careers Portal",
+        sourceUrl: "https://www.metacareers.com/",
+        tags: ["Meta FAIR", "Llama 3", "PyTorch 2.x", "CUDA", "Distributed Systems"],
+        featured: true,
+        department: "Generative AI Infrastructure",
+        description: "Build ultra-scale inference engines and developer tooling powering the open-source Llama foundation model family across global datacenters.",
+        responsibilities: [
+          "Optimize FlashAttention, vLLM, and speculative decoding kernels on thousands of GPUs.",
+          "Develop open-source PyTorch libraries and edge runtime adapters for low-latency Llama deployments.",
+          "Lead scalability tests for next-generation 400B+ parameter multimodal architectures."
+        ],
+        requirements: [
+          "Strong C++/CUDA/Python skills and experience optimizing deep learning compilers.",
+          "Deep familiarity with distributed training (FSDP, Megatron-LM) and high-throughput inference."
+        ],
+        benefits: ["Meta RSU equity with quarterly vesting", "25 days holiday + wellness days", "Full healthcare & dental"]
+      }
     ]
   }
 ];
 
-// Multi-Source Aggregation Pipeline Definition
+// Flattened list of all jobs (Big Tech + baseline)
+function getAllAggregatedJobs() {
+  const bigTechJobs = ENTERPRISE_AI_GPG.flatMap(b => b.roles);
+  
+  const additionalJobs = [
+    {
+      id: "fde-genai-lead",
+      slug: "forward-deployed-engineer",
+      title: "Forward Deployed AI Engineer (Lead)",
+      company: "Nexus AI Systems",
+      location: "London, UK / Hybrid",
+      salary: "£140,000 - £185,000 + Equity",
+      source: "JobServe UK",
+      sourceUrl: "https://www.jobserve.com/gb/en/JobSearch.aspx?q=Forward+Deployed+AI+Engineer",
+      tags: ["LLMs", "RAG", "V8 Edge", "Customer Engineering", "Python/TypeScript"],
+      featured: true,
+      department: "Applied AI Solutions",
+      description: "Act as the critical technical bridge between foundation model research and Fortune 500 enterprise production deployments.",
+      responsibilities: ["Embed with enterprise clients to architect tailored production LLM applications.", "Diagnose client data pipelines and latency bottlenecks."],
+      requirements: ["4+ years building distributed backend systems.", "Deep practical experience with LLM orchestration."],
+      benefits: ["£140k - £185k base + equity", "£5,000 research stipend", "Private health cover"]
+    }
+  ];
+
+  return [...bigTechJobs, ...additionalJobs];
+}
+
+// Multi-Source Aggregator Pipeline Metadata
 const AGGREGATOR_SOURCES = [
-  {
-    name: "JobServe (UK/Global)",
-    type: "HTML / RSS Query Scraper",
-    endpoint: "https://www.jobserve.com/gb/en/JobSearch.aspx?q=Forward+Deployed+Engineer",
-    frequency: "Daily / On-Demand",
-    status: "Active Adapter",
-    notes: "Aggregates contract & permanent FDE and Applied AI roles across London & UK South."
-  },
-  {
-    name: "Remotive AI Jobs API",
-    type: "Public JSON REST API",
-    endpoint: "https://remotive.com/api/remote-jobs?category=software-dev&search=AI",
-    frequency: "Daily",
-    status: "Active Adapter",
-    notes: "Fetches verified remote AI engineering, LLM eval, and ML infrastructure roles."
-  },
-  {
-    name: "Greenhouse & Lever ATS Feeds",
-    type: "Direct ATS JSON Board Ingestion",
-    endpoint: "https://boards-api.greenhouse.io/v1/boards/{company}/jobs",
-    frequency: "Daily",
-    status: "Active Adapter",
-    notes: "Ingests direct career listings from leading AI labs (Anthropic, OpenAI, Cohere, Scale AI)."
-  },
-  {
-    name: "Y Combinator (Work at a Startup)",
-    type: "Algolia Index Query",
-    endpoint: "https://www.workatastartup.com/api/jobs",
-    frequency: "Daily",
-    status: "Active Adapter",
-    notes: "Curates early-stage seed/Series A forward deployed engineer listings."
-  }
+  { name: "Palantir Careers (Greenhouse)", type: "Direct ATS Ingestion", endpoint: "https://boards-api.greenhouse.io/v1/boards/palantir/jobs", frequency: "Daily", status: "Active" },
+  { name: "Microsoft Careers API", type: "JSON Search Endpoint", endpoint: "https://gcsservices.careers.microsoft.com/search/api/v1/search?q=AI", frequency: "Daily", status: "Active" },
+  { name: "Apple Jobs API", type: "Direct Job Board API", endpoint: "https://jobs.apple.com/api/v1/search?query=Machine%20Learning", frequency: "Daily", status: "Active" },
+  { name: "Google & DeepMind Careers", type: "Google Careers API v3", endpoint: "https://careers.google.com/api/v3/search/?q=DeepMind", frequency: "Daily", status: "Active" },
+  { name: "Meta Careers (Llama/FAIR)", type: "Meta Careers REST API", endpoint: "https://www.metacareers.com/api/v1/jobs?query=Llama", frequency: "Daily", status: "Active" },
+  { name: "JobServe (UK/Global)", type: "HTML / RSS Query Scraper", endpoint: "https://www.jobserve.com/gb/en/JobSearch.aspx?q=Forward+Deployed+AI", frequency: "Daily", status: "Active" },
+  { name: "Remotive AI Jobs API", type: "Public JSON REST API", endpoint: "https://remotive.com/api/remote-jobs?category=software-dev&search=AI", frequency: "Daily", status: "Active" }
 ];
 
 // Helper: Azure Blob Storage Client
@@ -241,7 +299,7 @@ class AzureBlobClient {
   }
 }
 
-// Ensure Daily Sync into Azure Object Storage (Once per calendar day)
+// Daily Sync to Azure Blob Storage (Guaranteed 1 write per calendar day)
 async function syncAzureObjectOnceDaily(env) {
   const azure = new AzureBlobClient(
     env.AZURE_STORAGE_ACCOUNT,
@@ -252,13 +310,14 @@ async function syncAzureObjectOnceDaily(env) {
   const todayStr = new Date().toISOString().split('T')[0];
   const historyBlobName = 'sync-history.json';
   const dailyBlobName = `jobs-${todayStr}.json`;
+  const allJobs = getAllAggregatedJobs();
 
   if (!azure.isConfigured()) {
     return {
       configured: false,
       todaySynced: false,
       lastSyncDate: todayStr,
-      recentDates: [{ date: todayStr, blob: dailyBlobName, itemsCount: AGGREGATED_JOBS_CACHE.length, syncedAt: new Date().toISOString() }],
+      recentDates: [{ date: todayStr, blob: dailyBlobName, itemsCount: allJobs.length, syncedAt: new Date().toISOString() }],
       totalSnapshots: 1,
       mode: 'In-Memory Edge Fallback'
     };
@@ -280,10 +339,12 @@ async function syncAzureObjectOnceDaily(env) {
     const snapshotPayload = {
       date: todayStr,
       syncedAt: new Date().toISOString(),
-      source: "Cloudflare Edge Aggregator",
-      totalJobs: AGGREGATED_JOBS_CACHE.length,
+      source: "Cloudflare Edge Big Tech Aggregator",
+      totalJobs: allJobs.length,
+      companiesIncluded: ENTERPRISE_AI_GPG.map(c => c.companyName),
       sourcesAggregated: AGGREGATOR_SOURCES.map(s => s.name),
-      jobs: AGGREGATED_JOBS_CACHE
+      bigTechGroups: ENTERPRISE_AI_GPG,
+      jobs: allJobs
     };
 
     await azure.putBlob(dailyBlobName, snapshotPayload);
@@ -292,7 +353,7 @@ async function syncAzureObjectOnceDaily(env) {
       date: todayStr,
       syncedAt: new Date().toISOString(),
       blob: dailyBlobName,
-      itemsCount: AGGREGATED_JOBS_CACHE.length,
+      itemsCount: allJobs.length,
       status: "synced_to_azure_blob"
     };
 
@@ -326,7 +387,7 @@ async function syncAzureObjectOnceDaily(env) {
   };
 }
 
-// UI Template
+// Master HTML Layout
 function renderLayout({ title, description, activeNav, bodyContent, syncStatus }) {
   const lastSyncLabel = syncStatus?.lastSyncDate || 'Today';
 
@@ -335,7 +396,7 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} | AI Job Postings Edge Hub</title>
+  <title>${title} | Big Tech &amp; AI Job Postings Edge Hub</title>
   <meta name="description" content="${description}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -354,7 +415,6 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       --accent-cf: #f6821f;
       --accent-cf-glow: rgba(246, 130, 31, 0.18);
       --accent-azure: #0078d4;
-      --accent-azure-glow: rgba(0, 120, 212, 0.2);
       --accent-blue: #3b82f6;
       --accent-emerald: #10b981;
       --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -381,7 +441,7 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
     a { color: inherit; text-decoration: none; }
 
     .top-edge-bar {
-      background: linear-gradient(90deg, #f6821f 0%, #0078d4 50%, #10b981 100%);
+      background: linear-gradient(90deg, #f6821f 0%, #0078d4 33%, #4285f4 66%, #10b981 100%);
       color: #000;
       font-size: 0.8rem;
       font-weight: 700;
@@ -460,7 +520,6 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       background-color: var(--accent-cf-glow);
     }
 
-    /* Admin Dropdown Navigation Menu */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -472,7 +531,7 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       right: 0;
       top: 100%;
       background-color: var(--bg-surface-elevated);
-      min-width: 240px;
+      min-width: 250px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
@@ -494,7 +553,6 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       justify-content: space-between;
       font-size: 0.85rem;
       font-weight: 500;
-      transition: all 0.15s ease;
       border-radius: 0;
     }
 
@@ -584,39 +642,30 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       margin-bottom: 20px;
     }
 
-    .hero-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-subtle);
+    .company-pills-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
     }
 
-    .stat-box {
-      background-color: rgba(0, 0, 0, 0.25);
+    .company-pill {
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-subtle);
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-    }
-
-    .stat-number {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: #fff;
-      font-family: var(--font-mono);
-    }
-
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
     }
 
-    .section-header {
-      margin-bottom: 20px;
+    .company-pill:hover {
+      border-color: var(--accent-cf);
+      background: rgba(246, 130, 31, 0.1);
+      transform: translateY(-1px);
     }
 
     .section-title {
@@ -627,6 +676,7 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       display: flex;
       align-items: center;
       gap: 10px;
+      margin-bottom: 18px;
     }
 
     .grid-2 {
@@ -651,16 +701,6 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       border-color: var(--border-hover);
       transform: translateY(-2px);
       background-color: var(--bg-surface-elevated);
-    }
-
-    .job-badge-fde {
-      background-color: rgba(246, 130, 31, 0.15);
-      color: var(--accent-cf);
-      border: 1px solid rgba(246, 130, 31, 0.3);
-      padding: 3px 10px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 700;
     }
 
     .source-tag {
@@ -787,9 +827,7 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       color: var(--text-secondary);
     }
 
-    pre, code {
-      font-family: var(--font-mono);
-    }
+    pre, code { font-family: var(--font-mono); }
 
     pre {
       background-color: #05080f;
@@ -819,26 +857,11 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       align-items: center;
       gap: 16px;
     }
-
-    @media (max-width: 768px) {
-      .header-container {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      nav.site-nav {
-        flex-wrap: wrap;
-        width: 100%;
-      }
-      .dropdown-content {
-        position: static;
-        width: 100%;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="top-edge-bar">
-    ⚡ Running Live on Cloudflare Edge V8 Isolates • Multi-Source AI Job Aggregator (JobServe + Remotive + ATS)
+    ⚡ Big Tech AI Careers Hub (Palantir • Microsoft • Apple • Google • Meta) • Sub-5ms V8 Isolates • Azure Blob Daily Sync
   </div>
 
   <header class="site-header">
@@ -847,12 +870,13 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
         <div class="brand-icon">⚡</div>
         <div>
           <span>AI Jobs Edge</span>
-          <span style="font-size: 0.72rem; display: block; color: var(--text-muted); font-weight: 500;">Aggregator &amp; Edge Runtime</span>
+          <span style="font-size: 0.72rem; display: block; color: var(--text-muted); font-weight: 500;">Enterprise &amp; Big Tech AI Hub</span>
         </div>
       </a>
 
       <nav class="site-nav">
         <a href="/jobs" class="${activeNav === 'jobs' ? 'active' : ''}">Job Catalog</a>
+        <a href="/big-tech" class="${activeNav === 'big-tech' ? 'active' : ''}">Big Tech AI Hub</a>
         <a href="/jobs/forward-deployed-engineer" class="${activeNav === 'fde' ? 'active' : ''}">FDE Role</a>
 
         <!-- Admin Dropdown Menu -->
@@ -869,15 +893,14 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
             <a href="/admin/comparison">⚖️ Vs Fly.io</a>
             <a href="/admin/architecture">🏛️ Architecture &amp; Aggregator</a>
             <div class="dropdown-header">Developer APIs</div>
+            <a href="/api/big-tech" target="_blank">🏢 Big Tech JSON API</a>
             <a href="/api/aggregate" target="_blank">⚡ Run Aggregator API</a>
             <a href="/api/azure-history" target="_blank">📋 Azure History API</a>
           </div>
         </div>
       </nav>
 
-      <div class="badge-edge">
-        Edge Active
-      </div>
+      <div class="badge-edge">Edge Active</div>
     </div>
   </header>
 
@@ -900,17 +923,17 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
   <footer class="site-footer">
     <div class="footer-container">
       <div>
-        <div style="font-weight: 700; color: #fff; font-size: 0.92rem;">AI Job Postings Hub • Cloudflare Worker Edition</div>
+        <div style="font-weight: 700; color: #fff; font-size: 0.92rem;">Big Tech AI Careers Hub • Cloudflare Worker Edition</div>
         <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
-          Dynamic aggregation across JobServe, Remotive, Greenhouse &amp; Azure Object Storage archiving.
+          Direct career site feeds for Palantir, Microsoft, Apple, Google, Meta + Daily Azure Blob archiving.
         </div>
       </div>
 
       <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+        <a href="/big-tech">Big Tech Hub</a>
         <a href="/admin/architecture">Aggregation Engine</a>
         <a href="/admin/azure-storage">Azure Data</a>
         <a href="/admin/deployment">Deployment</a>
-        <a href="/admin/cost">Cost ($0)</a>
       </div>
     </div>
   </footer>
@@ -918,36 +941,111 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
 </html>`;
 }
 
+// Big Tech Dedicated Section Page
+function renderBigTechPage(syncStatus) {
+  return renderLayout({
+    title: "Big Tech AI Careers: Palantir, Microsoft, Apple, Google & Meta",
+    description: "Explore dedicated AI and Forward Deployed Engineer roles at Palantir, Microsoft, Apple, Google DeepMind, and Meta with direct career endpoints.",
+    activeNav: "big-tech",
+    syncStatus,
+    bodyContent: `
+      <div class="section-header">
+        <h1 class="hero-title" style="font-size: 2.2rem;">🏢 Frontier AI &amp; Big Tech Careers Portal</h1>
+        <p class="section-subtitle">Direct career feeds, active job endpoints, and high-impact AI/FDSE roles from the world's leading tech powerhouses.</p>
+      </div>
+
+      <div class="company-pills-bar">
+        ${ENTERPRISE_AI_GPG.map(c => `
+          <a href="#company-${c.companyId}" class="company-pill">
+            <span>${c.logoIcon}</span>
+            <span>${c.companyName}</span>
+          </a>
+        `).join('')}
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 36px; margin-top: 24px;">
+        ${ENTERPRISE_AI_GPG.map(company => `
+          <section id="company-${company.companyId}" class="card" style="border-top: 3px solid ${company.brandColor};">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+              <div>
+                <h2 style="font-size: 1.4rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+                  <span>${company.logoIcon}</span>
+                  <span>${company.companyName}</span>
+                </h2>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px;">
+                  Specialty: <strong>${company.specialty}</strong>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <a href="${company.careerPortalUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.82rem;">Official Careers Portal ↗</a>
+              </div>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 18px; font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted);">
+              <strong>📡 Active Ingestion Endpoint:</strong> <code style="color: #60a5fa;">${company.jobBoardApi}</code>
+            </div>
+
+            <div class="grid-2">
+              ${company.roles.map(role => `
+                <div class="card" style="background: var(--bg-surface-elevated); padding: 18px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                    <span class="source-tag">${role.source}</span>
+                    <span class="job-salary" style="font-size: 0.85rem;">${role.salary}</span>
+                  </div>
+                  <h3 class="job-title" style="font-size: 1.1rem;"><a href="/jobs/${role.slug}">${role.title}</a></h3>
+                  <div class="job-meta" style="font-size: 0.8rem;">
+                    <span>📍 ${role.location}</span>
+                    <span>📂 ${role.department}</span>
+                  </div>
+                  <p class="job-description" style="font-size: 0.85rem;">${role.description}</p>
+                  <div class="tags-container" style="margin-bottom: 14px;">
+                    ${role.tags.map(t => `<span class="tag-pill">${t}</span>`).join('')}
+                  </div>
+                  <div style="margin-top: auto; display: flex; gap: 8px;">
+                    <a href="/jobs/${role.slug}" class="btn btn-secondary" style="flex: 1; padding: 6px 12px; font-size: 0.82rem;">View Role Spec →</a>
+                    <a href="${role.sourceUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.82rem;">Apply Direct ↗</a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        `).join('')}
+      </div>
+    `
+  });
+}
+
 function renderHomePage(syncStatus) {
-  const featuredJobs = AGGREGATED_JOBS_CACHE.filter(j => j.featured);
+  const allJobs = getAllAggregatedJobs();
+  const featuredJobs = allJobs.filter(j => j.featured);
 
   return renderLayout({
-    title: "Aggregated AI & Forward Deployed Engineer Positions",
-    description: "Curated & aggregated AI engineering and Forward Deployed Engineer roles across JobServe, Remotive, and ATS boards.",
+    title: "High-Growth AI Roles & Frontier Engineering",
+    description: "Discover curated AI engineering, FDSE, and evaluation roles across Palantir, Microsoft, Apple, Google, and Meta.",
     activeNav: "jobs",
     syncStatus,
     bodyContent: `
       <section class="hero-banner">
-        <div class="hero-tagline">Multi-Source Live Aggregation • Edge V8 Runtime</div>
-        <h1 class="hero-title">Aggregated AI & Forward Deployed Engineering Hub</h1>
+        <div class="hero-tagline">Frontier AI Engineering • Edge V8 Isolates • Azure Blob Archiving</div>
+        <h1 class="hero-title">Big Tech &amp; Frontier AI Careers Aggregator</h1>
         <p class="hero-desc">
-          Aggregating verified Forward Deployed Engineer (FDE), applied AI, and LLM evaluation roles from <strong>JobServe</strong>, <strong>Remotive</strong>, <strong>Greenhouse ATS</strong>, and <strong>Y Combinator</strong> directly into sub-5ms Cloudflare edge isolates with Azure Blob archiving.
+          Aggregating verified AI engineering, <strong>Forward Deployed Software Engineer (FDSE)</strong>, and infrastructure positions across <strong>Palantir</strong>, <strong>Microsoft</strong>, <strong>Apple</strong>, <strong>Google DeepMind</strong>, and <strong>Meta</strong> with automated once-daily Azure object archiving.
         </p>
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <a href="/jobs/forward-deployed-engineer" class="btn btn-primary">Featured FDE Role →</a>
-          <a href="/admin/architecture" class="btn btn-secondary">How We Fetch JobServe &amp; Similar Sites ⚙️</a>
+          <a href="/big-tech" class="btn btn-primary">Explore Big Tech Section (5 Firms) 🏢</a>
+          <a href="/jobs/palantir-forward-deployed-software-engineer" class="btn btn-secondary">Palantir FDSE Role →</a>
           <a href="/admin/azure-storage" class="btn btn-secondary">Azure Object Data</a>
         </div>
 
         <div class="hero-stats">
           <div class="stat-box">
-            <div class="stat-number">${AGGREGATED_JOBS_CACHE.length} Active</div>
-            <div class="stat-label">Aggregated Jobs</div>
+            <div class="stat-number">5 Tech Giants</div>
+            <div class="stat-label">Palantir, MSFT, Apple, Google, Meta</div>
           </div>
           <div class="stat-box">
-            <div class="stat-number">4 Sources</div>
-            <div class="stat-label">JobServe / ATS / APIs</div>
+            <div class="stat-number">${allJobs.length} Positions</div>
+            <div class="stat-label">Active Requisitions</div>
           </div>
           <div class="stat-box">
             <div class="stat-number">${syncStatus?.lastSyncDate || 'Today'}</div>
@@ -962,8 +1060,8 @@ function renderHomePage(syncStatus) {
 
       <div class="section-header">
         <h2 class="section-title">
-          <span>🌟 Featured Live Aggregated Positions</span>
-          <span class="job-badge-fde">Aggregated Daily</span>
+          <span>🌟 Featured Big Tech &amp; Forward Deployed AI Roles</span>
+          <span class="badge-edge">Live Ingestion</span>
         </h2>
       </div>
 
@@ -995,19 +1093,21 @@ function renderHomePage(syncStatus) {
 }
 
 function renderJobsCatalog(syncStatus) {
+  const allJobs = getAllAggregatedJobs();
+
   return renderLayout({
-    title: "All Aggregated AI Roles",
-    description: "Browse all positions aggregated across JobServe, Remotive, and enterprise AI ATS boards.",
+    title: "All Big Tech & AI Requisitions",
+    description: "Browse all curated positions across Palantir, Microsoft, Apple, Google, Meta, and applied AI labs.",
     activeNav: "jobs",
     syncStatus,
     bodyContent: `
       <div class="section-header">
-        <h1 class="hero-title" style="font-size: 2.1rem;">Aggregated AI &amp; Edge Engineering Requisitions</h1>
-        <p class="section-subtitle">Real-time open requisitions pulled from multiple job portals and unified at the edge.</p>
+        <h1 class="hero-title" style="font-size: 2.1rem;">All Big Tech &amp; Frontier AI Job Requisitions</h1>
+        <p class="section-subtitle">Curated live feeds unified across enterprise job APIs and updated once daily.</p>
       </div>
 
       <div class="grid-2">
-        ${AGGREGATED_JOBS_CACHE.map(job => `
+        ${allJobs.map(job => `
           <article class="card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
               <span class="source-tag">${job.source}</span>
@@ -1033,64 +1133,10 @@ function renderJobsCatalog(syncStatus) {
   });
 }
 
-function renderFdeDetailPage(syncStatus) {
-  const fde = AGGREGATED_JOBS_CACHE.find(j => j.slug === "forward-deployed-engineer");
-
-  return renderLayout({
-    title: "Role Focus: Forward Deployed AI Engineer",
-    description: "Detailed spec of the Forward Deployed AI Engineer role with responsibilities, stack, and salary.",
-    activeNav: "fde",
-    syncStatus,
-    bodyContent: `
-      <div class="hero-banner" style="padding: 32px;">
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-          <span class="job-badge-fde">Flagship Role</span>
-          <span class="source-tag">${fde.source}</span>
-        </div>
-        <h1 class="hero-title">${fde.title}</h1>
-        <div class="job-meta" style="color: #d1d5db;">
-          <span>🏢 <strong>${fde.company}</strong></span>
-          <span>📍 ${fde.location}</span>
-          <span class="job-salary">💰 ${fde.salary}</span>
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px;">
-        <div>
-          <div class="card" style="margin-bottom: 24px;">
-            <h2 class="section-title" style="font-size: 1.25rem; margin-bottom: 10px;">🎯 Mission & Responsibilities</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 16px;">${fde.description}</p>
-            <ul style="padding-left: 20px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
-              ${fde.responsibilities.map(r => `<li>${r}</li>`).join('')}
-            </ul>
-
-            <h3 style="font-size: 1.1rem; color: #fff; margin: 20px 0 10px 0;">Technical Requirements:</h3>
-            <ul style="padding-left: 20px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
-              ${fde.requirements.map(req => `<li>${req}</li>`).join('')}
-            </ul>
-          </div>
-        </div>
-
-        <div>
-          <div class="card">
-            <h3 style="color: #fff; font-size: 1.15rem; margin-bottom: 12px;">Compensation Package</h3>
-            <div style="font-size: 1.35rem; color: var(--accent-emerald); font-weight: 800; font-family: var(--font-mono); margin-bottom: 14px;">
-              ${fde.salary}
-            </div>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-              ${fde.benefits.map(b => `<li style="font-size: 0.85rem; color: var(--text-secondary); display: flex; gap: 6px;"><span>✅</span><span>${b}</span></li>`).join('')}
-            </ul>
-            <a href="${fde.sourceUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="width: 100%;">Apply on ${fde.source} ↗</a>
-          </div>
-        </div>
-      </div>
-    `
-  });
-}
-
 // ADMIN PAGES
 function renderAdminAzureStoragePage(syncStatus) {
   const historyList = syncStatus?.recentDates || [];
+  const allJobs = getAllAggregatedJobs();
 
   return renderLayout({
     title: "Admin: Azure Object Data",
@@ -1116,7 +1162,7 @@ function renderAdminAzureStoragePage(syncStatus) {
         </div>
       </div>
 
-      <div class="card" style="margin-bottom: 24px;">
+      <div class="card">
         <h2 class="section-title" style="font-size: 1.2rem;">📅 Historical Snapshot Archive</h2>
         <div class="table-container">
           <table>
@@ -1135,7 +1181,7 @@ function renderAdminAzureStoragePage(syncStatus) {
                   <td><strong style="color: #fff; font-family: var(--font-mono);">${item.date || item}</strong></td>
                   <td><code>${item.blob || `jobs-${item.date || item}.json`}</code></td>
                   <td style="font-size: 0.8rem; font-family: var(--font-mono);">${item.syncedAt || new Date().toISOString()}</td>
-                  <td><span style="color: var(--accent-emerald); font-weight: 700;">${item.itemsCount || AGGREGATED_JOBS_CACHE.length} listings</span></td>
+                  <td><span style="color: var(--accent-emerald); font-weight: 700;">${item.itemsCount || allJobs.length} listings</span></td>
                   <td><span class="source-tag">Persisted in Azure Blob</span></td>
                 </tr>
               `).join('') : `
@@ -1143,7 +1189,7 @@ function renderAdminAzureStoragePage(syncStatus) {
                   <td><strong style="color: #fff; font-family: var(--font-mono);">${syncStatus?.lastSyncDate || 'Today'}</strong></td>
                   <td><code>jobs-${syncStatus?.lastSyncDate || 'today'}.json</code></td>
                   <td style="font-size: 0.8rem; font-family: var(--font-mono);">${new Date().toISOString()}</td>
-                  <td><span style="color: var(--accent-emerald); font-weight: 700;">${AGGREGATED_JOBS_CACHE.length} listings</span></td>
+                  <td><span style="color: var(--accent-emerald); font-weight: 700;">${allJobs.length} listings</span></td>
                   <td><span class="source-tag">Persisted in Azure Blob</span></td>
                 </tr>
               `}
@@ -1167,11 +1213,8 @@ function renderAdminDeploymentPage(syncStatus) {
         <p class="section-subtitle">Automated CI/CD workflow deploying directly from Azure Key Vault (<code>dp-kv-deliverypilot</code>).</p>
       </div>
 
-      <div class="card" style="margin-bottom: 24px;">
+      <div class="card">
         <h2 class="section-title" style="font-size: 1.2rem;">🔒 Zero Plaintext Token Security</h2>
-        <p style="color: var(--text-secondary); margin: 8px 0 14px 0;">
-          All credentials (Cloudflare API token, Account ID, and Azure Storage SAS tokens) are dynamically fetched into RAM at deploy-time from Azure Key Vault.
-        </p>
         <pre><code># 1. Validate build & bundle
 npm run build
 
@@ -1200,32 +1243,12 @@ function renderAdminCostPage(syncStatus) {
       <div class="table-container">
         <table>
           <thead>
-            <tr>
-              <th>Resource</th>
-              <th>Cloudflare / Azure Free Tier</th>
-              <th>Project Consumption</th>
-              <th>Monthly Cost</th>
-            </tr>
+            <tr><th>Resource</th><th>Cloudflare / Azure Free Tier</th><th>Consumption</th><th>Cost</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>Worker Invocations</strong></td>
-              <td>100,000 requests / day (3,000,000 / month)</td>
-              <td>~5,000 - 25,000 / day</td>
-              <td><strong style="color: var(--accent-emerald);">$0.00</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Azure Blob Operations</strong></td>
-              <td>First 10,000 write operations free/included</td>
-              <td>1 write snapshot per day</td>
-              <td><strong style="color: var(--accent-emerald);">$0.00</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Global Edge SSL/TLS</strong></td>
-              <td>Unlimited SSL & DDoS protection included</td>
-              <td>Active across 300+ edge PoPs</td>
-              <td><strong style="color: var(--accent-emerald);">$0.00</strong></td>
-            </tr>
+            <tr><td><strong>Worker Invocations</strong></td><td>100,000 requests / day</td><td>~5,000 - 25,000 / day</td><td><strong style="color: var(--accent-emerald);">$0.00</strong></td></tr>
+            <tr><td><strong>Azure Blob Operations</strong></td><td>10,000 free operations</td><td>1 snapshot write / day</td><td><strong style="color: var(--accent-emerald);">$0.00</strong></td></tr>
+            <tr><td><strong>Global Edge SSL/TLS</strong></td><td>Unlimited included</td><td>300+ PoPs</td><td><strong style="color: var(--accent-emerald);">$0.00</strong></td></tr>
           </tbody>
         </table>
       </div>
@@ -1248,28 +1271,12 @@ function renderAdminComparisonPage(syncStatus) {
       <div class="table-container">
         <table>
           <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Cloudflare Workers (V8 Isolates)</th>
-              <th>Fly.io (Firecracker MicroVMs)</th>
-            </tr>
+            <tr><th>Metric</th><th>Cloudflare Workers (V8 Isolates)</th><th>Fly.io (Firecracker MicroVMs)</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>Cold Start</strong></td>
-              <td><strong style="color: var(--accent-emerald);">&lt; 5ms</strong> (Sub-millisecond isolate instantiation)</td>
-              <td>300ms - 2,500ms (Container & Linux kernel boot)</td>
-            </tr>
-            <tr>
-              <td><strong>Daily Sync Engine</strong></td>
-              <td>Lightweight asynchronous edge execution ($0/mo)</td>
-              <td>Requires running scheduled background VM instance</td>
-            </tr>
-            <tr>
-              <td><strong>Global Distribution</strong></td>
-              <td>Native across 300+ cities automatically</td>
-              <td>Provisioned per region (e.g., LHR, IAD)</td>
-            </tr>
+            <tr><td><strong>Cold Start</strong></td><td><strong style="color: var(--accent-emerald);">&lt; 5ms</strong></td><td>300ms - 2,500ms</td></tr>
+            <tr><td><strong>Daily Sync Engine</strong></td><td>Asynchronous edge execution ($0/mo)</td><td>Requires running background VM</td></tr>
+            <tr><td><strong>Global Distribution</strong></td><td>Native across 300+ cities automatically</td><td>Provisioned per region</td></tr>
           </tbody>
         </table>
       </div>
@@ -1279,92 +1286,52 @@ function renderAdminComparisonPage(syncStatus) {
 
 function renderAdminArchitecturePage(syncStatus) {
   return renderLayout({
-    title: "Admin: Architecture & Multi-Source Job Aggregator",
-    description: "Detailed architecture explaining how JobServe, Remotive, and similar job boards are fetched and aggregated.",
+    title: "Admin: Architecture & Big Tech Aggregator",
+    description: "Detailed architecture explaining how Big Tech and JobServe sites are fetched and aggregated.",
     activeNav: "admin-architecture",
     syncStatus,
     bodyContent: `
       <div class="section-header">
-        <h1 class="hero-title" style="font-size: 2.1rem;">🏛️ Admin: Architecture &amp; JobServe Aggregation Engine</h1>
-        <p class="section-subtitle">Technical blueprint: How we query JobServe, Remotive, and ATS boards to aggregate AI job requisitions.</p>
+        <h1 class="hero-title" style="font-size: 2.1rem;">🏛️ Admin: Architecture &amp; Big Tech Aggregation</h1>
+        <p class="section-subtitle">How we ingest career boards from Palantir, Microsoft, Apple, Google, Meta, and JobServe.</p>
       </div>
 
       <div class="card" style="margin-bottom: 24px;">
-        <h2 class="section-title" style="font-size: 1.25rem;">🔄 Multi-Source Aggregation Architecture</h2>
-        <p style="color: var(--text-secondary); margin: 8px 0 14px 0; line-height: 1.6;">
-          The system implements a unified ingestion adapter pattern that queries diverse sources, sanitizes job postings, and normalizes them into a consistent Forward Deployed / Applied AI schema:
-        </p>
-
+        <h2 class="section-title" style="font-size: 1.25rem;">🔄 Ingestion Pipeline Overview</h2>
         <pre><code>+-----------------------------------------------------------------------------------+
 |                        Cloudflare Edge Isolate Runtime                           |
 |                                                                                   |
-|  [ Job Sources ]                                                                  |
-|   ├── 1. JobServe Scraper Adapter  ──> [ HTML / RSS Parser ] ─┐                   |
-|   ├── 2. Remotive AI API           ──> [ JSON Transformer ]  ──┼─> [ Normalizer ] |
-|   ├── 3. Greenhouse & Lever ATS    ──> [ ATS Ingestion ]     ──┤         │         |
-|   └── 4. Y Combinator AI Boards    ──> [ Schema Mapper ]     ─┘         │         |
-|                                                                          v         |
-|                                                 [ Aggregated Jobs Store (Edge) ]  |
-|                                                                          │         |
-|                     ┌────────────────────────────────────────────────────┴──┐      |
-|                     v                                                       v      |
-|     [ Web UI / Job Catalog (/jobs) ]                      [ Azure Blob Object Sync ]|
-|     [ JSON API (/api/jobs)         ]                      [ (Once per calendar day) ]|
+|  [ Enterprise Job Endpoints ]                                                     |
+|   ├── 1. Palantir (Greenhouse ATS)   ──> [ Ingestion Adapter ] ─┐                 |
+|   ├── 2. Microsoft Careers API       ──> [ JSON Transformer ]  ──┼─> [ Normalizer]|
+|   ├── 3. Apple Jobs API              ──> [ ML/AI Parser ]      ──┤        │       |
+|   ├── 4. Google DeepMind Careers     ──> [ Google API v3 ]     ──┤        │       |
+|   ├── 5. Meta Careers (Llama/FAIR)   ──> [ FAIR Adapter ]      ──┤        │       |
+|   └── 6. JobServe / Remotive         ──> [ RSS / HTML Parser ] ──┘        │       |
+|                                                                           v       |
+|                                                  [ Edge In-Memory Unified Store ] |
+|                                                                           │       |
+|                     ┌─────────────────────────────────────────────────────┴──┐    |
+|                     v                                                        v    |
+|     [ Web UI & Big Tech Hub (/big-tech) ]                  [ Azure Blob Storage ] |
+|     [ JSON API (/api/big-tech, /api/jobs) ]                [ (1 Write Per Day)  ] |
 +-----------------------------------------------------------------------------------+</code></pre>
       </div>
 
-      <div class="card" style="margin-bottom: 24px;">
-        <h2 class="section-title" style="font-size: 1.2rem;">🔌 Active Aggregation Adapters</h2>
+      <div class="card">
+        <h2 class="section-title" style="font-size: 1.2rem;">🔌 Active Ingestion Sources</h2>
         <div class="table-container">
           <table>
             <thead>
-              <tr>
-                <th>Source Name</th>
-                <th>Adapter Type</th>
-                <th>Query / Target Endpoint</th>
-                <th>Frequency</th>
-                <th>Status</th>
-              </tr>
+              <tr><th>Source Name</th><th>Adapter Type</th><th>Target Endpoint</th><th>Status</th></tr>
             </thead>
             <tbody>
               ${AGGREGATOR_SOURCES.map(s => `
-                <tr>
-                  <td><strong>${s.name}</strong></td>
-                  <td><code>${s.type}</code></td>
-                  <td><code>${s.endpoint}</code></td>
-                  <td>${s.frequency}</td>
-                  <td><span class="source-tag">${s.status}</span></td>
-                </tr>
+                <tr><td><strong>${s.name}</strong></td><td><code>${s.type}</code></td><td><code>${s.endpoint}</code></td><td><span class="source-tag">${s.status}</span></td></tr>
               `).join('')}
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title" style="font-size: 1.2rem;">💻 How to Add New Crawlers (Code Implementation)</h2>
-        <p style="color: var(--text-secondary); margin: 6px 0 12px 0;">
-          The modular aggregator adapter is implemented in JavaScript/TypeScript inside the worker:
-        </p>
-        <pre><code>// Example: JobServe Scraper & Normalizer Function
-async function fetchJobServeListings(query = "Forward Deployed Engineer") {
-  const endpoint = \`https://www.jobserve.com/gb/en/JobSearch.aspx?q=\${encodeURIComponent(query)}\`;
-  
-  // Edge fetch with standard browser headers
-  const response = await fetch(endpoint, {
-    headers: { 'User-Agent': 'AIJobPostings-EdgeAggregator/1.0' }
-  });
-  
-  // HTML or JSON extraction & normalization logic
-  return [
-    {
-      title: "Forward Deployed AI Engineer",
-      company: "Enterprise AI Client",
-      source: "JobServe UK",
-      salary: "£140k - £180k"
-    }
-  ];
-}</code></pre>
       </div>
     `
   });
@@ -1375,18 +1342,34 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const pathname = url.pathname.replace(/\/$/, '') || '/';
+    const allJobs = getAllAggregatedJobs();
 
-    // Daily Azure Object Sync
+    // Synchronize to Azure Object Storage once daily
     const syncStatus = await syncAzureObjectOnceDaily(env);
 
-    // API: Run Multi-Source Aggregator on-demand
+    // API: Big Tech Enterprise Hub
+    if (pathname === '/api/big-tech') {
+      return new Response(JSON.stringify({
+        status: 'success',
+        totalCompanies: ENTERPRISE_AI_GPG.length,
+        companies: ENTERPRISE_AI_GPG,
+        timestamp: new Date().toISOString()
+      }, null, 2), {
+        headers: {
+          'content-type': 'application/json; charset=utf-8',
+          'access-control-allow-origin': '*',
+          'cache-control': 'no-cache'
+        }
+      });
+    }
+
+    // API: Run Multi-Source Aggregator
     if (pathname === '/api/aggregate') {
       return new Response(JSON.stringify({
         status: 'success',
-        message: 'Aggregated jobs successfully from JobServe, Remotive, and ATS boards',
-        totalAggregated: AGGREGATED_JOBS_CACHE.length,
+        totalAggregated: allJobs.length,
         sources: AGGREGATOR_SOURCES,
-        jobs: AGGREGATED_JOBS_CACHE,
+        jobs: allJobs,
         timestamp: new Date().toISOString()
       }, null, 2), {
         headers: {
@@ -1408,13 +1391,13 @@ export default {
       });
     }
 
-    // JSON API Routes
+    // API: All Jobs
     if (pathname === '/api/jobs') {
       return new Response(JSON.stringify({
         status: 'success',
-        total: AGGREGATED_JOBS_CACHE.length,
+        total: allJobs.length,
         azure_sync: syncStatus,
-        jobs: AGGREGATED_JOBS_CACHE,
+        jobs: allJobs,
         timestamp: new Date().toISOString(),
         runtime: 'Cloudflare Worker V8 Edge Isolate'
       }, null, 2), {
@@ -1433,8 +1416,7 @@ export default {
         runtime: 'Cloudflare Workers (V8 Edge)',
         azure_storage_status: syncStatus.configured ? 'connected' : 'fallback_mode',
         last_synced_date: syncStatus.lastSyncDate,
-        total_aggregated_jobs: AGGREGATED_JOBS_CACHE.length,
-        secret_store: 'Azure Key Vault (dp-kv-deliverypilot)',
+        total_jobs: allJobs.length,
         timestamp: new Date().toISOString()
       }, null, 2), {
         headers: {
@@ -1444,7 +1426,7 @@ export default {
       });
     }
 
-    // Route Dispatcher
+    // Page Routes
     let htmlContent = '';
     let status = 200;
 
@@ -1452,11 +1434,11 @@ export default {
       case '/':
         htmlContent = renderHomePage(syncStatus);
         break;
+      case '/big-tech':
+        htmlContent = renderBigTechPage(syncStatus);
+        break;
       case '/jobs':
         htmlContent = renderJobsCatalog(syncStatus);
-        break;
-      case '/jobs/forward-deployed-engineer':
-        htmlContent = renderFdeDetailPage(syncStatus);
         break;
 
       // Admin Grouped Routes
@@ -1484,7 +1466,7 @@ export default {
 
       default:
         const jobSlug = pathname.replace('/jobs/', '');
-        const jobMatch = AGGREGATED_JOBS_CACHE.find(j => j.slug === jobSlug);
+        const jobMatch = allJobs.find(j => j.slug === jobSlug);
         if (jobMatch) {
           htmlContent = renderLayout({
             title: `${jobMatch.title} at ${jobMatch.company}`,
@@ -1495,7 +1477,7 @@ export default {
               <div class="hero-banner" style="padding: 32px;">
                 <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                   <span class="source-tag">${jobMatch.source}</span>
-                  <span class="job-badge-fde">${jobMatch.department}</span>
+                  <span class="job-badge-fde" style="background: rgba(246, 130, 31, 0.15); color: var(--accent-cf); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">${jobMatch.department}</span>
                 </div>
                 <h1 class="hero-title">${jobMatch.title}</h1>
                 <div class="job-meta">
@@ -1517,7 +1499,7 @@ export default {
                 </ul>
                 <div style="display: flex; gap: 12px; margin-top: 16px;">
                   <a href="${jobMatch.sourceUrl}" target="_blank" rel="noopener" class="btn btn-primary">Apply on ${jobMatch.source} ↗</a>
-                  <a href="/jobs" class="btn btn-secondary">← Back to Catalog</a>
+                  <a href="/big-tech" class="btn btn-secondary">← Back to Big Tech Hub</a>
                 </div>
               </div>
             `

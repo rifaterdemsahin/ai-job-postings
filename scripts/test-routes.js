@@ -1,20 +1,26 @@
 #!/usr/bin/env node
 
 /**
- * Endpoint testing script to verify all worker and admin routes
+ * Endpoint testing script to verify all worker, admin, and big-tech routes
  */
 
 const targetUrl = process.argv[2] || 'http://localhost:8787';
 
 const routes = [
   '/',
+  '/big-tech',
   '/jobs',
-  '/jobs/forward-deployed-engineer',
+  '/jobs/palantir-forward-deployed-software-engineer',
+  '/jobs/microsoft-applied-ai-engineer-copilot',
+  '/jobs/apple-intelligence-edge-runtime-engineer',
+  '/jobs/google-deepmind-forward-deployed-research-engineer',
+  '/jobs/meta-generative-ai-systems-engineer',
   '/admin/azure-storage',
   '/admin/deployment',
   '/admin/cost',
   '/admin/comparison',
   '/admin/architecture',
+  '/api/big-tech',
   '/api/aggregate',
   '/api/azure-history',
   '/api/jobs',
@@ -34,13 +40,13 @@ async function runTests() {
       const contentType = res.headers.get('content-type') || '';
       
       if (res.ok) {
-        console.log(`✅ [${res.status}] ${route.padEnd(35)} (${elapsed}ms) - ${contentType}`);
+        console.log(`✅ [${res.status}] ${route.padEnd(55)} (${elapsed}ms) - ${contentType}`);
       } else {
-        console.error(`❌ [${res.status}] ${route.padEnd(35)} (${elapsed}ms)`);
+        console.error(`❌ [${res.status}] ${route.padEnd(55)} (${elapsed}ms)`);
         hasFailure = true;
       }
     } catch (err) {
-      console.error(`❌ [ERR] ${route.padEnd(35)} - ${err.message}`);
+      console.error(`❌ [ERR] ${route.padEnd(55)} - ${err.message}`);
       hasFailure = true;
     }
   }
