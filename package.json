@@ -1,0 +1,25 @@
+{
+  "name": "ai-job-postings",
+  "version": "1.0.0",
+  "description": "Ultra-fast Cloudflare Worker AI Job Postings Hub with Forward Deployed Engineer specs, Fly.io comparison, Deployment Guide, and Architecture",
+  "main": "dist/worker.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "node scripts/build.js",
+    "deploy:azure": "node scripts/deploy-azure.js",
+    "deploy": "wrangler deploy",
+    "test": "node scripts/test-routes.js"
+  },
+  "keywords": [
+    "cloudflare-worker",
+    "ai-jobs",
+    "forward-deployed-engineer",
+    "edge-runtime"
+  ],
+  "author": "rifaterdemsahin",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.123.0"
+  }
+}
