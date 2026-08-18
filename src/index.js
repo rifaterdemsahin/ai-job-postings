@@ -2,6 +2,8 @@
  * AI Job Postings Hub - Cloudflare Worker Edge Application
  * 
  * Includes:
+ * - Timed Skool Community Floating Banner (appears after 2.5s, dismissed only once per user session/localStorage)
+ *   Target: https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63
  * - Big Tech & Frontier AI Enterprise Hub:
  *    - Palantir (Pioneer of Forward Deployed Software Engineering - FDSE)
  *    - Microsoft (Azure AI, Copilot, Semantic Kernel)
@@ -387,9 +389,10 @@ async function syncAzureObjectOnceDaily(env) {
   };
 }
 
-// Master HTML Layout
+// Master HTML Layout with Timed Skool Banner
 function renderLayout({ title, description, activeNav, bodyContent, syncStatus }) {
   const lastSyncLabel = syncStatus?.lastSyncDate || 'Today';
+  const skoolCommunityUrl = "https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -415,6 +418,7 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       --accent-cf: #f6821f;
       --accent-cf-glow: rgba(246, 130, 31, 0.18);
       --accent-azure: #0078d4;
+      --accent-skool: #ff9100;
       --accent-blue: #3b82f6;
       --accent-emerald: #10b981;
       --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -582,6 +586,14 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       display: inline-flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .btn-skool-nav {
+      background: linear-gradient(135deg, #ff9100, #ff5e00);
+      color: #000 !important;
+      font-weight: 700 !important;
+      padding: 6px 12px !important;
+      border-radius: var(--radius-sm);
     }
 
     main.main-content {
@@ -841,6 +853,99 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       margin: 16px 0;
     }
 
+    /* Timed Floating Skool Banner (Shows once per session after delay) */
+    #skool-timed-banner {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      max-width: 420px;
+      background: linear-gradient(145deg, #182234 0%, #101624 100%);
+      border: 1px solid rgba(255, 145, 0, 0.4);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75), 0 0 20px rgba(255, 145, 0, 0.2);
+      z-index: 9999;
+      animation: slideUpFade 0.4s ease forwards;
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .skool-banner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .skool-badge {
+      background: rgba(255, 145, 0, 0.15);
+      color: #ffaa33;
+      border: 1px solid rgba(255, 145, 0, 0.3);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .skool-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .skool-close-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .skool-banner-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .skool-banner-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .skool-cta-btn {
+      background: linear-gradient(135deg, #ff9100, #ff5e00);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.88rem;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(255, 94, 0, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .skool-cta-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(255, 94, 0, 0.45);
+    }
+
     footer.site-footer {
       border-top: 1px solid var(--border-subtle);
       background-color: var(--bg-surface);
@@ -878,6 +983,7 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
         <a href="/jobs" class="${activeNav === 'jobs' ? 'active' : ''}">Job Catalog</a>
         <a href="/big-tech" class="${activeNav === 'big-tech' ? 'active' : ''}">Big Tech AI Hub</a>
         <a href="/jobs/forward-deployed-engineer" class="${activeNav === 'fde' ? 'active' : ''}">FDE Role</a>
+        <a href="${skoolCommunityUrl}" target="_blank" rel="noopener" class="btn-skool-nav">Join Community 🚀</a>
 
         <!-- Admin Dropdown Menu -->
         <div class="dropdown">
@@ -920,6 +1026,21 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
     ${bodyContent}
   </main>
 
+  <!-- Timed Floating Skool Community Banner -->
+  <div id="skool-timed-banner">
+    <div class="skool-banner-header">
+      <span class="skool-badge">🚀 Delivery Pilot Community</span>
+      <button class="skool-close-btn" onclick="dismissSkoolBanner()" title="Close">&times;</button>
+    </div>
+    <div class="skool-banner-title">Be Part of the Applied AI &amp; FDE Community!</div>
+    <p class="skool-banner-desc">
+      Connect with Forward Deployed Engineers, founders, and applied AI builders. Get real-time job alerts, interview guides, and architecture tear-downs.
+    </p>
+    <a href="${skoolCommunityUrl}" target="_blank" rel="noopener" class="skool-cta-btn" onclick="dismissSkoolBanner()">
+      Join Skool Community Free →
+    </a>
+  </div>
+
   <footer class="site-footer">
     <div class="footer-container">
       <div>
@@ -930,13 +1051,38 @@ function renderLayout({ title, description, activeNav, bodyContent, syncStatus }
       </div>
 
       <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--text-secondary);">
+        <a href="${skoolCommunityUrl}" target="_blank" rel="noopener" style="color: #ffaa33; font-weight: 700;">Skool Community ↗</a>
         <a href="/big-tech">Big Tech Hub</a>
-        <a href="/admin/architecture">Aggregation Engine</a>
         <a href="/admin/azure-storage">Azure Data</a>
         <a href="/admin/deployment">Deployment</a>
       </div>
     </div>
   </footer>
+
+  <script>
+    // Timed Skool Community Banner (Triggers after 2.5 seconds, once per user session)
+    (function() {
+      const STORAGE_KEY = 'dp_skool_banner_dismissed_v1';
+      const isDismissed = localStorage.getItem(STORAGE_KEY);
+
+      if (!isDismissed) {
+        setTimeout(function() {
+          const banner = document.getElementById('skool-timed-banner');
+          if (banner) {
+            banner.style.display = 'block';
+          }
+        }, 2500); // 2.5 second delay
+      }
+    })();
+
+    function dismissSkoolBanner() {
+      const banner = document.getElementById('skool-timed-banner');
+      if (banner) {
+        banner.style.display = 'none';
+      }
+      localStorage.setItem('dp_skool_banner_dismissed_v1', 'true');
+    }
+  </script>
 </body>
 </html>`;
 }
@@ -1034,7 +1180,7 @@ function renderHomePage(syncStatus) {
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <a href="/big-tech" class="btn btn-primary">Explore Big Tech Section (5 Firms) 🏢</a>
-          <a href="/jobs/palantir-forward-deployed-software-engineer" class="btn btn-secondary">Palantir FDSE Role →</a>
+          <a href="https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63" target="_blank" rel="noopener" class="btn btn-secondary" style="border-color: #ff9100; color: #ffaa33;">Join Skool Community 🚀</a>
           <a href="/admin/azure-storage" class="btn btn-secondary">Azure Object Data</a>
         </div>
 
@@ -1417,6 +1563,7 @@ export default {
         azure_storage_status: syncStatus.configured ? 'connected' : 'fallback_mode',
         last_synced_date: syncStatus.lastSyncDate,
         total_jobs: allJobs.length,
+        skool_community: "https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63",
         timestamp: new Date().toISOString()
       }, null, 2), {
         headers: {
@@ -1499,6 +1646,7 @@ export default {
                 </ul>
                 <div style="display: flex; gap: 12px; margin-top: 16px;">
                   <a href="${jobMatch.sourceUrl}" target="_blank" rel="noopener" class="btn btn-primary">Apply on ${jobMatch.source} ↗</a>
+                  <a href="https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63" target="_blank" rel="noopener" class="btn btn-secondary" style="border-color: #ff9100; color: #ffaa33;">Discuss in Skool Community 🚀</a>
                   <a href="/big-tech" class="btn btn-secondary">← Back to Big Tech Hub</a>
                 </div>
               </div>

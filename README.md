@@ -1,11 +1,21 @@
 # AI Job Postings Edge Hub ⚡
 
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-V8_Isolates-F38020?logo=cloudflare)](https://ai-job-postings.polished-boat-17b2.workers.dev)
+[![Skool Community](https://img.shields.io/badge/Skool_Community-Delivery_Pilot-FF9100?logo=skool)](https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63)
 [![Big Tech](https://img.shields.io/badge/Big_Tech-Palantir_|_MSFT_|_Apple_|_Google_|_Meta-0078D4)](#-big-tech--frontier-ai-careers-section)
 [![Azure Key Vault](https://img.shields.io/badge/Azure_Key_Vault-dp--kv--deliverypilot-0078D4?logo=microsoftazure)](https://azure.microsoft.com/)
 [![Azure Blob Storage](https://img.shields.io/badge/Azure_Blob_Storage-dpstoryboardsa-0089D6?logo=microsoftazure)](https://azure.microsoft.com/)
 
 High-performance, edge-native job board aggregating **Forward Deployed AI Engineer (FDE / FDSE)**, foundation model systems, and applied AI roles across **Palantir**, **Microsoft**, **Apple**, **Google DeepMind**, **Meta**, and **JobServe**. Built on **Cloudflare Workers (V8 Isolates)** with automated once-daily **Azure Blob Object Storage** archiving.
+
+---
+
+## 🚀 Delivery Pilot AI Community (Skool)
+
+Join our active community of Forward Deployed Engineers, founders, and applied AI builders:
+- **Join Skool Community:** [https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63](https://www.skool.com/delivery-pilot-8938/job-postings?p=248d7a63)
+
+*(Note: The web app displays a timed, non-intrusive floating community invite banner that only appears once per visitor session).*
 
 ---
 
@@ -28,12 +38,6 @@ High-performance, edge-native job board aggregating **Forward Deployed AI Engine
 - **Admin > Cost Breakdown ($0/mo):** [https://ai-job-postings.polished-boat-17b2.workers.dev/admin/cost](https://ai-job-postings.polished-boat-17b2.workers.dev/admin/cost)
 - **Admin > Vs Fly.io Comparison:** [https://ai-job-postings.polished-boat-17b2.workers.dev/admin/comparison](https://ai-job-postings.polished-boat-17b2.workers.dev/admin/comparison)
 - **Admin > Architecture & Aggregator Engine:** [https://ai-job-postings.polished-boat-17b2.workers.dev/admin/architecture](https://ai-job-postings.polished-boat-17b2.workers.dev/admin/architecture)
-
-### ⚡ JSON Edge APIs
-- **Big Tech Jobs API:** [`GET /api/big-tech`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/big-tech)
-- **Aggregated Jobs API:** [`GET /api/jobs`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/jobs)
-- **Azure Sync History API:** [`GET /api/azure-history`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/azure-history)
-- **Health Check:** [`GET /api/health`](https://ai-job-postings.polished-boat-17b2.workers.dev/api/health)
 
 ---
 
